@@ -6,5 +6,9 @@
             "addWords": true,
             "scope": "workspace"
         }
-    }
+    },
+    "cSpell.words": [
+        "dotenv",
+        "loguru"
+    ]
 }
