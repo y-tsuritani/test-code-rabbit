@@ -41,11 +41,9 @@ def get_ddl_file_names(folder_path: str) -> list:
     Returns:
         list: DDLファイル名のリスト
     """
-    ddl_file_names = []
     try:
-        for file in os.listdir(folder_path):
-            if file.endswith(".sql"):
-                ddl_file_names.append(file)  # noqa: PERF401
+        path = Path(folder_path)
+        ddl_file_names = [file for file in path.iterdir() if file.suffix == ".sql"]
     except FileNotFoundError:
         logger.error(f"Folder {folder_path} not found.")
     except PermissionError:
@@ -65,7 +63,8 @@ def load_query_from_file(file_path: str) -> str:
         str: クエリ
     """
     try:
-        with Path.open(file_path, encoding="utf-8") as f:
+        path = Path(file_path)
+        with path.open("rt", encoding="utf-8") as f:
             query = f.read()
     except FileNotFoundError:
         logger.error(f"File {file_path} not found.")
