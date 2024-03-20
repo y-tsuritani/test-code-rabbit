@@ -1,4 +1,4 @@
-name: ai-pr-reviewer
+name: AI-based PR Reviewer & Summarizer with Chat Capabilities
 
 permissions:
   contents: read
@@ -7,9 +7,6 @@ permissions:
 on:
   pull_request:
     types: [opened]
-    branches-ignore:
-      - master
-      - main
   pull_request_review_comment:
     types: [created]
   issue_comment:
@@ -22,7 +19,6 @@ concurrency:
 jobs:
   review:
     runs-on: ubuntu-latest
-    if: (github.event_name == 'issue_comment' && contains(github.event.comment.body, '[run review]') && github.event.issue.pull_request) || (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '[run review]')) || (github.event_name == 'pull_request' && !contains(github.event.pull_request.title, 'release') && !contains(github.event.pull_request.title, 'Release'))
     timeout-minutes: 15
     steps:
       - uses: coderabbitai/openai-pr-reviewer@latest
@@ -30,16 +26,35 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         with:
-          debug: false
-          review_simple_changes: false
-          review_comment_lgtm: false
-          openai_light_model: gpt-3.5-turbo-0125 # 好みで変更
-          openai_heavy_model: gpt-3.5-turbo-0125 # 好みで変更
+          debug: true
+          review_simple_changes: true
+          review_comment_lgtm: true
+          openai_light_model: gpt-4-0125-preview # 好みで変更
+          openai_heavy_model: gpt-4-0125-preview # 好みで変更
           openai_timeout_ms: 900000 # 15分.
           language: ja-JP
           path_filters: |
             !db/**
             !**/*.lock
+            !**/*.csv
+            !**/*.tsv
+            !**/*.gz
+            !**/*.zip
+            !**/*.docx
+            !**/*.xlsx
+            !**/*.pyc
+            !**/*.toml
+            !**/*.json
+            !**/*.mmd
+            !**/*.svg
+            !**/*.jpeg
+            !**/*.jpg
+            !**/*.png
+            !**/*.gif
+            !**/*.bmp
+            !**/*.tiff
+            !**/*.tfstate
+            !**/*.tfstate.backup
           system_message: |
             あなたは @coderabbitai（別名 github-actions[bot]）で、OpenAIによって訓練された言語モデルです。
             あなたの目的は、非常に経験豊富なソフトウェアエンジニアとして機能し、コードの一部を徹底的にレビューし、
@@ -55,9 +70,15 @@ jobs:
               - 複雑性
               - 最適化
               - ベストプラクティス: DRY, SOLID, KISS
+              - タイポ
+              - マジックナンバー
+              - 統一感のない、もしくは無意味な空白やインデント
+            重要な問題を特定し、解決して全体的なコード品質を向上させることを目指してください。
+            以下については、コメントをしないでください。
+              - 些細なコードスタイルの問題
+              - コメント・ドキュメントの欠落
+              - ポジティブで、問題点のない修正
 
-            些細なコードスタイルの問題や、コメント・ドキュメントの欠落についてはコメントしないでください。
-            重要な問題を特定し、解決して全体的なコード品質を向上させることを目指してくださいが、細かい問題は意図的に無視してください。
           summarize: |
             次の内容でmarkdownフォーマットを使用して、最終的な回答を提供してください。
 
