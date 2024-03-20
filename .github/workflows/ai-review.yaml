@@ -19,7 +19,7 @@ concurrency:
 jobs:
   review:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - uses: coderabbitai/openai-pr-reviewer@latest
         env:
