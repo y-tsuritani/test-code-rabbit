@@ -111,7 +111,7 @@ def check_table_exists(
         return False
     except Exception as e:
         logger.error(f"Unexpected error occurred while checking table existence: {e}")
-        return False
+        raise Exception(f"Error checking if table exists: {e}") from e  # noqa: EM102
     else:
         return True
 
